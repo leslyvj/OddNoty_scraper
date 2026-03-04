@@ -96,14 +96,31 @@ OddNoty/
 └── README.md
 ```
 
-## Data Pipeline (every 10 seconds)
+## Deployment (Run 24/7)
 
-1. Fetch live matches from API
-2. Fetch current odds
-3. Store odds snapshot in DB
-4. Compare with previous odds
-5. Evaluate alert rules
-6. Trigger alerts (Telegram)
+Since OddNoty needs to monitor matches while your laptop is off, you should deploy the worker to a cloud platform:
+
+### Render (Recommended)
+1. Push your code to GitHub: `git push origin main`
+2. Create a **Background Worker** on [Render](https://render.com/).
+3. Connect your GitHub repo.
+4. Set the build command: `pip install -r worker/requirements.txt`
+5. Set the start command: `python worker/main.py`
+6. Add Environment Variables from your `.env` to the Render Dashboard.
+
+### Key Pool Configuration
+OddNoty uses a **Multi-Key Rotation** system to maximize free API quotas.
+- Copy `worker/goaledge_keys.yaml` to `worker/goaledge_keys.local.yaml`.
+- Add your actual API keys to the `.local.yaml` file.
+- The worker will automatically prefer `.local.yaml` and rotate keys if one hits a limit (429).
+
+## Data Pipeline (every 10-30 seconds)
+
+1. **Score Pillar**: Fetch live scores (Football-Data, API-Football)
+2. **Odds Pillar**: Fetch O/U odds (TheOddsAPI, Betfair)
+3. **Storage**: Save odds snapshots to PostgreSQL
+4. **Movement**: Detect significant price shifts (>15%)
+5. **Alerts**: Evaluate custom rules & notify via Telegram
 
 ## License
 
