@@ -128,11 +128,10 @@ async def main():
     logger.info(f"🤖 Starting Cloud OddBot on port {port}...")
     
     # Run both simultaneously
-    await asyncio.gather(
-        bot_app.initialize(),
-        bot_app.start_polling(),
-        server.serve()
-    )
+    async with bot_app:
+        await bot_app.updater.start_polling()
+        await server.serve()
+        await bot_app.updater.stop()
 
 if __name__ == "__main__":
     asyncio.run(main())
